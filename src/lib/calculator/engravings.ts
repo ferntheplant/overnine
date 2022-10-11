@@ -139,7 +139,6 @@ export const Adrenaline: Modifier = (profile, level = 0) => {
 export const AllEngravings = <const>{
 	Grudge: Grudge,
 	KeenBluntWeapon: KeenBluntWeapon,
-	RaidCaptain: RaidCaptain,
 	PreciseDagger: PreciseDagger,
 	AllOutAttack: AllOutAttack,
 	Barricade: Barricade,
@@ -152,5 +151,6 @@ export const AllEngravings = <const>{
 	StabilizedStatus: StabilizedStatus,
 	SuperCharge: SuperCharge,
 	SpiritAbsorption: SpiritAbsorption,
-	Adrenaline: Adrenaline
+	Adrenaline: Adrenaline,
+	RaidCaptain: RaidCaptain // always do raid captain last
 };
