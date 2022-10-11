@@ -3,8 +3,6 @@
 
 	let user = testUser;
 
-  $: console.log(`${typeof user['BackAttack']}`)
-
 	$: results = computeFinalResults(user);
 </script>
 

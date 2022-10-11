@@ -1,6 +1,8 @@
 import _ from 'lodash';
 
-import type { Level } from './types';
+import { logModifier } from './logger';
+
+import type { Level, Modifier, OptionalKeys } from './types';
 import type { Rate, Multiplier, Stats } from './stats';
 import {
 	StatsNames,
@@ -27,24 +29,40 @@ type Profile = {
 	bonusDamage: Multiplier;
 };
 
-function finalDamageMultiplier(profile: Profile): Multiplier {
+const AttackPower: Modifier = (profile) => {
+	return {
+		...profile,
+		bonusDamage: profile.bonusDamage * rateToMultiplier(profile.attackPower)
+	};
+};
+
+const EffictiveCritMultiplier: Modifier = (profile) => {
 	const critRate = critToRate(profile.stats.crit) + profile.critRate;
 	const effectiveCritMultiplier =
 		1 + (rateToDecimal(profile.critDamage) - 1) * rateToDecimal(critRate);
+	return {
+		...profile,
+		bonusDamage: profile.bonusDamage * effectiveCritMultiplier
+	};
+};
 
-	return profile.bonusDamage * rateToMultiplier(profile.attackPower) * effectiveCritMultiplier;
-}
+const HiddenModifiers = <const>{
+	AttackPower,
+	EffictiveCritMultiplier
+};
 
 type AllEngravingsNames = keyof typeof AllEngravings;
 type RelicSetsNames = keyof typeof RelicSets;
 type AllClassesNames = keyof typeof AllClasses;
 type MiscModifiersNames = keyof typeof MiscModifiers;
+type HiddenModifiersNames = keyof typeof HiddenModifiers;
 
 const ALL_MODIFIERS = <const>{
 	...MiscModifiers,
 	...RelicSets,
 	...AllClasses,
-	...AllEngravings // always compute engravings last
+	...AllEngravings, // always compute engravings last
+	...HiddenModifiers
 };
 type ALL_MODIFIERS_NAMES = keyof typeof ALL_MODIFIERS;
 
@@ -53,12 +71,11 @@ type LevelModifiers = {
 };
 
 type BooleanModifiers = {
-	[Key in MiscModifiersNames]: boolean;
+	[Key in MiscModifiersNames | HiddenModifiersNames]: boolean;
 };
 
 type UserModifiers = LevelModifiers & BooleanModifiers;
 
-type OptionalKeys<T> = { [Key in keyof T]?: T[Key] };
 export type User = Stats & OptionalKeys<UserModifiers>;
 export const UserProps = _.keys(ALL_MODIFIERS).concat(StatsNames) as (keyof User)[];
 
@@ -99,18 +116,23 @@ export function computeFinalResults(user: User): Results {
 
 	for (const [key, modifier] of Object.entries(ALL_MODIFIERS)) {
 		const modifierSetting = user[key as ALL_MODIFIERS_NAMES];
-		if (typeof modifierSetting === 'boolean' || modifierSetting === undefined) {
-			profile = modifierSetting ? modifier(profile) : profile;
-		} else {
-			profile = modifier(profile, modifierSetting);
+		if (modifierSetting === undefined || modifierSetting === false) {
+			continue;
 		}
+		const [newProfile, logString] = logModifier(
+			modifier,
+			profile,
+			modifierSetting === true ? undefined : modifierSetting
+		);
+		if (!_.isEmpty(logString)) console.log(logString);
+		profile = newProfile;
 	}
 
 	return {
 		attackSpeed: profile.attackSpeed + swiftToAS(profile.stats.swift),
 		moveSpeed: profile.moveSpeed + swiftToMS(profile.stats.swift),
 		cooldownReduction: swiftToCDR(profile.stats.swift) + profile.cooldownReduction,
-		damageMultiplier: finalDamageMultiplier(profile)
+		damageMultiplier: profile.bonusDamage
 	};
 }
 
@@ -168,5 +190,8 @@ export const testUser: User = {
 	DeathStrike: 0,
 	LoyalCompanion: 0,
 	Reflux: 0,
-	Pistoleer: 0
+	Pistoleer: 0,
+	// vacuous modifiers
+	AttackPower: true,
+	EffictiveCritMultiplier: true
 };

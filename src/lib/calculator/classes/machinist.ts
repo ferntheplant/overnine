@@ -13,11 +13,11 @@ export const EvolutionaryLegacy: Modifier = (profile, level = 0) => {
 	};
 };
 
-// TODO: encode AT - only join/drone skill damage boosted
 export const ArthetinianSkill: Modifier = (profile, level = 0) => {
 	const damage = { 0: 0, 1: 15, 2: 20, 3: 25 };
 	return {
 		...profile,
+		// TODO: encode only join/drone skill damage boosted
 		// bonusDamage: profile.bonusDamage * rateToMultiplier(damage[level])
 		moveSpeed: profile.moveSpeed + (level > 0 ? 10 : 0)
 	};
