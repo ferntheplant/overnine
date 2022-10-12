@@ -10,19 +10,19 @@ import { Pistoleer } from './deadeye';
 
 // TODO: encode more classes
 export const AllClasses = <const>{
-	DemonicImpulse,
-	PerfectSupression,
-	Taijustsu,
-	ShockTraining,
-	Control,
-	FirstIntention,
-	EsotericSkill,
-	Empreror,
-	Empress,
-	EvolutionaryLegacy,
-	ArthetinianSkill,
-	DeathStrike,
-	LoyalCompanion,
-	Reflux,
-	Pistoleer
+  DemonicImpulse,
+  PerfectSupression,
+  Taijustsu,
+  ShockTraining,
+  Control,
+  FirstIntention,
+  EsotericSkill,
+  Empreror,
+  Empress,
+  EvolutionaryLegacy,
+  ArthetinianSkill,
+  DeathStrike,
+  LoyalCompanion,
+  Reflux,
+  Pistoleer
 };
